@@ -12,17 +12,13 @@ interface Report {
 
 export const getReport = async (req: Request, res: Response) => {
 
-    const sql = `
-        SELECT
-            caregiver.id      AS caregiver_id,
-            caregiver.name    AS caregiver_name,
-            patient.id        AS patient_id,
-            patient.name      AS patient_name,
-            visit.date        AS visit_date
-        FROM caregiver
-        JOIN visit ON visit.caregiver = caregiver.id
-        JOIN patient ON patient.id = visit.patient
-    `;
+    const sql = `SELECT  
+    caregiver.name    AS caregiver_name,
+    string_agg(distinct patient.name, ',')  AS patient_name
+    FROM caregiver
+    JOIN visit ON (visit.caregiver = caregiver.id AND DATE_PART('year',visit.date) = '${parseInt(req.params.year)}')
+    JOIN patient ON patient.id = visit.patient
+    GROUP BY caregiver.name`;
     
     let result : QueryResult;
     try {

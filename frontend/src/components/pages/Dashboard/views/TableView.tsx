@@ -1,3 +1,4 @@
+import { report } from "process";
 import React from "react";
 import styled from "styled-components/macro";
 import { ReactComponent as MedFlytLogo } from "../../../../assets/logo.svg";
@@ -14,6 +15,7 @@ import { Report } from "../Dashboard";
 interface Props {
     report: Report;
     isRefreshing: boolean;
+    onClickRefresh: () => void;
 }
 
 const Header = styled(Center)`
@@ -37,6 +39,7 @@ const StyledTableView = styled.div`
 const { Table, Tr, Th, Td } = TableBlocks;
 
 const TableView = (props: Props) => {
+
     return (
         <StyledTableView>
             <RefreshIndicator isRefreshing={props.isRefreshing} />
@@ -45,7 +48,7 @@ const TableView = (props: Props) => {
                 <PrimaryText>Year {props.report.year} - caregivers report</PrimaryText>
             </Header>
             <Row justifyContent="flex-end">
-                <Button>
+                <Button onClick={props.onClickRefresh}>
                     <RefreshIcon />
                     <span>Refresh</span>
                 </Button>
