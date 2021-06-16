@@ -22,17 +22,17 @@ export type Report = t.TypeOf<typeof resType>;
 
 type State =
     | {
-          type: "Initial";
-      }
+        type: "Initial";
+    }
     | {
-          type: "Resolved";
-          report: Report;
-          isRefreshing: boolean;
-      }
+        type: "Resolved";
+        report: Report;
+        isRefreshing: boolean;
+    }
     | {
-          type: "Rejected";
-          error: string;
-      };
+        type: "Rejected";
+        error: string;
+    };
 
 function useDashboard(params: { year: number }) {
     const [state, setState] = React.useState<State>({ type: "Initial" });
@@ -51,16 +51,15 @@ function useDashboard(params: { year: number }) {
 
     const fetchReport = React.useCallback(() => {
         startLoading();
-
         return axios
             .get<unknown>(endpoint(`reports/${params.year}`))
             .then((response) => {
-                if (!resType.is(response)) {
+                if (!resType.is(response.data)) {
                     console.error(PathReporter.report(resType.decode(response)).join(", "));
                     throw new Error("Error");
                 }
 
-                setState({ type: "Resolved", report: response, isRefreshing: false });
+                setState({ type: "Resolved", report: response.data, isRefreshing: false });
             })
             .catch(() => {
                 setState({ type: "Rejected", error: "Error" });
@@ -81,13 +80,18 @@ const Dashboard = () => {
         case "Initial":
             return <LoadingView />;
         case "Rejected":
-            return <ErrorView message={state.error} onClickRetry={actions.fetchReport} />;
+            return <ErrorView message={"error"} onClickRetry={actions.fetchReport} />;
         case "Resolved":
-            return <TableView {...state} />;
+            return <TableView
+                isRefreshing={state.isRefreshing}
+                report={state.report}
+                onClickRefresh={actions.fetchReport}
+            />;
         default:
             assertNever(state);
             return <></>;
     }
 };
+
 
 export default Dashboard;
